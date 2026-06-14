@@ -34,6 +34,44 @@ def generate_response(query, retrieved_chunks):
             "I couldn't find anything relevant in the loaded rule books. "
             "Try rephrasing your question — or check that your ingestion pipeline is working."
         )
+    
+    context_blocks = []
 
-    # Your implementation here.
-    return "⚙️ Response generation not yet implemented. Complete Milestone 3 to activate answers."
+    for i, chunk in enumerate(retrieved_chunks, start=1):
+        context_blocks.append(
+            f"""--- CHUNK {i} ---
+            Game: {chunk.get("game", "Unknown")}
+            Distance: {chunk.get("distance", "Unknown")}
+            Rule text:
+            {chunk.get("text", "")}
+            """
+        )
+
+    context = "\n".join(context_blocks)
+
+    system_prompt = (
+        "You are RulesBot, a board game rules assistant. "
+        "Answer using only the retrieved rule text provided by the user. "
+        "Do not use outside knowledge, prior knowledge, assumptions, or guesses. "
+        "If the retrieved rule text does not contain the answer, say that the loaded rule books do not contain enough information to answer. "
+        "Every answer must identify the game or games the answer came from. "
+        "Use wording like 'According to the Catan rules...' when the source game is clear."
+      )
+
+    user_prompt = f"""Retrieved rule text:
+
+    {context}
+
+    User question:
+    {query}
+    """
+
+    response = _client.chat.completions.create(
+        model=LLM_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+    )
+
+    return response.choices[0].message.content

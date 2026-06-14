@@ -116,11 +116,13 @@ handle these cases better, at the cost of more implementation complexity.
 **Actual chunk count produced across all 8 rule books:**
 
 ```
-[your answer here]
+149
 ```
 
 **One thing that surprised you or didn't match your expectations:**
 
 ```
-[your answer here]
+One thing that surprised you or didn't match your expectations:
+
+I was surprised that the chunk count alone does not really tell me whether the chunks are good. A higher chunk count could mean better coverage, but it could also mean the rule books were split into fragments that are too small to be useful. I need to inspect the actual chunk text to know whether each chunk is meaningful on its own.
 ```

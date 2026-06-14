@@ -69,4 +69,26 @@ def retrieve(query, n_results=N_RESULTS):
         return []
 
     # Your implementation here.
-    return []
+    results = _collection.query(
+        query_texts=[query],
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"],
+    )
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
+
+    chunks = []
+
+    for text, metadata, distance in zip(documents, metadatas, distances):
+        chunks.append(
+            {
+                "text": text,
+                "game": metadata.get("game", "Unknown"),
+                "distance": float(distance),
+            }
+        )
+    for chunk in chunks:
+        print(f"[{chunk['game']}] (dist: {chunk['distance']:.3f}) {chunk['text'][:100]}")
+        
+    return chunks

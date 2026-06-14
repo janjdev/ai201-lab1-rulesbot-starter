@@ -45,7 +45,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Describe how you will use `_collection.query()` to find relevant chunks. What arguments will you pass, and why?*
 
 ```
-[your answer here]
+I will use _collection.query() with query_texts=[query], n_results=n_results, and include=["documents", "metadatas", "distances"]. This lets ChromaDB embed the user's question with the same embedding function used during ingestion, compare it to the stored rule chunks, and return the closest chunks by cosine distance.
 ```
 
 ---
@@ -55,7 +55,17 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Sketch out what one item in your return list looks like as a concrete example. Where does each field come from in the query results?*
 
 ```
-[your answer here]
+One returned item will look like:
+
+{
+  "text": "When a 7 is rolled, no one collects any resources...",
+  "game": "Catan",
+  "distance": 0.142
+}
+
+The "text" field comes from results["documents"][0].
+The "game" field comes from results["metadatas"][0], specifically the metadata stored during ingestion.
+The "distance" field comes from results["distances"][0].
 ```
 
 ---
@@ -65,7 +75,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *`_collection.query()` returns nested lists. Describe what index you need to access to get the actual list of results for a single query, and why the nesting exists.*
 
 ```
-[your answer here]
+_collection.query() returns nested lists because it can handle multiple query strings at once. Since RulesBot only sends one query at a time, the actual results are inside index [0]. So I need to use results["documents"][0], results["metadatas"][0], and results["distances"][0].
 ```
 
 ---
@@ -75,7 +85,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *Will you filter out results above a certain distance score, or return all `n_results` regardless of how relevant they are? What are the tradeoffs of each approach?*
 
 ```
-[your answer here]
+I will return all n_results for now instead of filtering by a hard threshold. This makes it easier to inspect retrieval behavior during testing. The tradeoff is that weak chunks may still be passed to generation, but since n_results is only 3, the context should stay small. If I see high-distance or unrelated chunks causing bad answers, I can add filtering later.
 ```
 
 ---
@@ -85,7 +95,7 @@ Results should be ordered from most to least relevant (lowest to highest distanc
 *How does your implementation behave when: (a) the collection is empty, (b) the query matches no chunks well, (c) the query matches chunks from multiple games?*
 
 ```
-[your answer here]
+If the collection is empty, retrieve() returns an empty list. If the query matches no chunks well, retrieve() still returns the closest available chunks, but their distance scores may be high and should be inspected during testing. If the query matches chunks from multiple games, retrieve() returns them ranked by distance because broad questions like "how do you win?" may reasonably apply to several games.
 ```
 
 ---

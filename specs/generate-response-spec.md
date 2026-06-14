@@ -42,7 +42,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *How will you format the retrieved chunks before passing them to the LLM? Describe the structure — not the code. Consider: will you label chunks by game? Include distance scores? Separate chunks with delimiters?*
 
 ```
-[your answer here]
+I will format each retrieved chunk with a clear chunk number, game label, distance score, and rule text. Each chunk will be separated with delimiters so the model can tell where one source ends and the next begins. Including the game name helps the model cite which game the answer comes from.
 ```
 
 ---
@@ -52,7 +52,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *Write the exact system prompt instruction you will use to prevent the model from answering beyond the retrieved text. This is the most important design decision in this function.*
 
 ```
-[your answer here]
+You are RulesBot, a board game rules assistant. Answer using only the retrieved rule text provided by the user. Do not use outside knowledge, prior knowledge, assumptions, or guesses. If the retrieved rule text does not contain the answer, say that the loaded rule books do not contain enough information to answer.
 ```
 
 ---
@@ -62,7 +62,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *Write the exact instruction you will use to tell the model to identify which game its answer comes from.*
 
 ```
-[your answer here]
+Every answer must identify the game or games the answer came from. Use wording like "According to the Catan rules..." when the source game is clear.
 ```
 
 ---
@@ -72,7 +72,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *What should the response say when the answer isn't found in the loaded rule books? Write the exact fallback message.*
 
 ```
-[your answer here]
+I couldn't find enough information in the loaded rule books to answer that.
 ```
 
 ---
@@ -82,7 +82,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *`retrieved_chunks` may include chunks with high distance scores (weak relevance). Will you filter these out before building context, pass them all in, or handle them another way? What are the tradeoffs?*
 
 ```
-[your answer here]
+I will pass all retrieved chunks into the prompt for now because retrieve() only returns the top 3 results. The benefit is that the model gets all available context. The risk is that a weakly related chunk could distract the model. If testing shows that high-distance chunks are causing wrong answers, I would filter out chunks above a distance threshold before generation.
 ```
 
 ---
@@ -92,7 +92,7 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 *Describe how you will structure the messages list for the API call — what goes in the system message vs. the user message?*
 
 ```
-[your answer here]
+The system message will contain the grounding and citation instructions. The user message will contain the formatted retrieved chunks followed by the user's original question. This separates behavior instructions from the actual task content.
 ```
 
 ---
@@ -104,14 +104,14 @@ Returns a fallback string (not an error) when `retrieved_chunks` is empty.
 **Test query and response:**
 
 ```
-Query: [your test query]
-Response: [abbreviated response]
-Correctly grounded? [yes / no]
-Cited the right game? [yes / no]
+Query: How do you set up the board in Catan?
+Response: According to the Catan rules, to set up the board, you arrange the terrain hexes randomly...
+Correctly grounded? yes
+Cited the right game? yes
 ```
 
 **One thing you changed from your original spec after seeing the actual output:**
 
 ```
-[your answer here]
+I did not change the original spec after testing. The grounding instruction and chunk formatting worked as expected, so I kept the implementation aligned with the original plan.
 ```
